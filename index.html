@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Downloader</title>
+</head>
+<body>
+    <h1>Download YouTube Video</h1>
+    <input id="urlInput" placeholder="Paste YouTube link here" size="50" />
+    <button onclick="downloadVideo()">Download</button>
+    <script>
+        async function downloadVideo() {
+            const url = document.getElementById('urlInput').value;
+            const response = await fetch('/download', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ url })
+            });
+            if (response.ok) {
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'video.mp4';
+                a.click();
+            } else {
+                const err = await response.json();
+                alert('Error: ' + err.error);
+            }
+        }
+    </script>
+</body>
+</html>
