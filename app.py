@@ -1,9 +1,12 @@
-from flask import Flask, send_from_directory, request, send_file, jsonify
-import yt_dlp
 import os
 import uuid
+from flask import Flask, request, send_file, jsonify, send_from_directory
+import yt_dlp
 
 app = Flask(__name__, static_folder='static')
+
+# Secret cookies file path
+COOKIES_PATH = "/etc/secrets/cookies.txt"  # matches your secret file on Render
 
 @app.route('/')
 def index():
@@ -17,7 +20,13 @@ def download_video():
         return jsonify({"error": "No URL provided"}), 400
 
     file_id = str(uuid.uuid4()) + ".mp4"
-    ydl_opts = {'format': 'best', 'outtmpl': file_id}
+    ydl_opts = {
+        'format': 'best',
+        'outtmpl': file_id,
+        'cookiefile': COOKIES_PATH,
+        'quiet': True,
+    }
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
@@ -28,5 +37,5 @@ def download_video():
         if os.path.exists(file_id):
             os.remove(file_id)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 10000)))
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
