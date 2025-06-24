@@ -5,8 +5,8 @@ import yt_dlp
 
 app = Flask(__name__, static_folder='static')
 
-# Secret cookies file path
-COOKIES_PATH = "/etc/secrets/cookies.txt"  # matches your secret file on Render
+# Read-only secret file path
+COOKIES_PATH = "/etc/secrets/cookies.txt"
 
 @app.route('/')
 def index():
@@ -19,7 +19,7 @@ def download_video():
     if not url:
         return jsonify({"error": "No URL provided"}), 400
 
-    file_id = str(uuid.uuid4()) + ".mp4"
+    file_id = f"{uuid.uuid4()}.mp4"
     ydl_opts = {
         'format': 'best',
         'outtmpl': file_id,
@@ -34,6 +34,7 @@ def download_video():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
+        # Only delete the video file after sending
         if os.path.exists(file_id):
             os.remove(file_id)
 
